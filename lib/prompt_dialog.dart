@@ -20,6 +20,8 @@ Future<String> prompt(
   int minLines = 1,
   int maxLines = 1,
   bool autoFocus: false,
+  TextInputType keyboardType,
+  List<TextInputFormatter> inputFormatters,
 }) {
   String value;
   return showDialog(
@@ -33,6 +35,8 @@ Future<String> prompt(
           maxLines: maxLines,
           autofocus: autoFocus,
           initialValue: initialValue,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           onChanged: (text) => value = text,
         ),
         actions: <Widget>[
