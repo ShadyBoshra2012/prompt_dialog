@@ -11,8 +11,7 @@ import 'package:flutter/services.dart';
 /// The `autoFocus` argument will be autoFocus text field form of alert dialog.
 ///
 /// Returns a [Future<bool>].
-Future<String> prompt(
-  BuildContext context, {
+Future<String> prompt(BuildContext context, {
   Widget title,
   Widget textOK,
   Widget textCancel,
@@ -23,36 +22,45 @@ Future<String> prompt(
   bool autoFocus: false,
   TextInputType keyboardType,
   List<TextInputFormatter> inputFormatters,
+  bool isTextSelected = false,
 }) {
   String value;
+  TextEditingController textController = TextEditingController();
+  textController.text = initialValue;
+  FocusNode textNode = FocusNode();
+  if(isTextSelected)
+    textNode.addListener(() =>
+    textController.selection = TextSelection(baseOffset: 0, extentOffset: textController.value.text.length));
   return showDialog(
     context: context,
-    builder: (_) => WillPopScope(
-      child: AlertDialog(
-        title: title,
-        content: TextFormField(
-          decoration: InputDecoration(hintText: hintText),
-          minLines: minLines,
-          maxLines: maxLines,
-          autofocus: autoFocus,
-          initialValue: initialValue,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          onChanged: (text) => value = text,
+    builder: (_) =>
+        WillPopScope(
+          child: AlertDialog(
+            title: title,
+            content: TextFormField(
+              controller: textController,
+              focusNode: textNode,
+              decoration: InputDecoration(hintText: hintText),
+              minLines: minLines,
+              maxLines: maxLines,
+              autofocus: autoFocus,
+              keyboardType: keyboardType,
+              inputFormatters: inputFormatters,
+              onChanged: (text) => value = text,
+            ),
+            actions: <Widget>[
+              FlatButton(
+                  child: textCancel != null ? textCancel : Text('Cancel'),
+                  onPressed: () => Navigator.pop(context, null)),
+              FlatButton(
+                  child: textOK != null ? textOK : Text('OK'),
+                  onPressed: () => Navigator.pop(context, value)),
+            ],
+          ),
+          onWillPop: () {
+            Navigator.pop(context, null);
+            return;
+          },
         ),
-        actions: <Widget>[
-          FlatButton(
-              child: textCancel != null ? textCancel : Text('Cancel'),
-              onPressed: () => Navigator.pop(context, null)),
-          FlatButton(
-              child: textOK != null ? textOK : Text('OK'),
-              onPressed: () => Navigator.pop(context, value)),
-        ],
-      ),
-      onWillPop: () {
-        Navigator.pop(context, null);
-        return;
-      },
-    ),
   );
 }
